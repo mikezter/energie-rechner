@@ -537,11 +537,119 @@
     .fade-in:nth-child(3) { animation-delay: 0.19s; }
     .fade-in:nth-child(4) { animation-delay: 0.26s; }
 
-    @media (max-width: 720px) {
-      header { padding: 20px 24px; }
-      .hero, .main { padding-left: 24px; padding-right: 24px; }
-      .main { grid-template-columns: 1fr; }
-      .hero h1 { font-size: 2rem; }
+    @media (max-width: 640px) {
+      header {
+        padding: 16px 20px;
+      }
+
+      .tagline { display: none; }
+
+      .hero {
+        padding: 28px 20px 20px;
+      }
+
+      .hero h1 {
+        font-size: 1.8rem;
+        letter-spacing: -0.5px;
+      }
+
+      .hero p { font-size: 0.88rem; }
+
+      .main {
+        padding: 0 20px;
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      /* Controls: panel display + battery grid stays compact */
+      .control-card { padding: 18px; }
+
+      .panel-display .big-num { font-size: 2.4rem; }
+
+      .battery-options {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      /* KWP bar: wrap into 2×2 grid instead of single row */
+      .kwp-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        padding: 18px;
+      }
+
+      .kwp-divider { display: none; }
+
+      .kwp-stat .val { font-size: 1.2rem; }
+
+      /* Flow diagram: stack vertically ☀️ → 🔋 → 🏠 */
+      .flow-card { padding: 20px 16px; }
+
+      .flow-diagram {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        margin-bottom: 24px;
+      }
+
+      .flow-node { flex-direction: row; align-items: center; gap: 12px; }
+
+      .flow-node .node-box {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        text-align: left;
+      }
+
+      .flow-node .node-icon {
+        font-size: 1.3rem;
+        margin-bottom: 0;
+        flex-shrink: 0;
+      }
+
+      .flow-node .node-val { font-size: 1rem; }
+      .flow-node .node-lbl { font-size: 0.6rem; margin-top: 1px; }
+
+      /* Arrows become horizontal dividers between nodes */
+      .flow-arrow {
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        padding: 0 8px;
+        gap: 8px;
+      }
+
+      .arrow-line {
+        flex: 1;
+        height: 2px;
+      }
+
+      /* rotate the arrowhead to point down */
+      .arrow-line::after {
+        right: unset;
+        top: unset;
+        left: 50%;
+        bottom: -4px;
+        transform: translateX(-50%) rotate(90deg);
+        border: 5px solid transparent;
+      }
+
+      .arrow-teal::after  { border-left-color: var(--teal); }
+      .arrow-amber::after { border-left-color: var(--amber); }
+
+      .arrow-kwh { font-size: 0.6rem; white-space: nowrap; }
+
+      /* Breakdown bars */
+      .bar-label { width: 100px; font-size: 0.68rem; }
+      .bar-val   { font-size: 0.72rem; width: 70px; }
+
+      /* Battery visual */
+      .battery-visual { padding: 16px; gap: 16px; }
+      .battery-info .bat-size { font-size: 1.4rem; }
+      .battery-info .bat-desc { font-size: 0.7rem; }
+      .battery-info .bat-ratio { font-size: 0.65rem; }
     }
   </style>
 </head>
