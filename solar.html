@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voltara™ – Solar Eigenverbrauch</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0b1120;
+      --surface:   #111827;
+      --surface2:  #1a2436;
+      --border:    #1f2f47;
+      --teal:      #00b4a0;
+      --teal-dim:  rgba(0,180,160,0.12);
+      --teal-glow: rgba(0,180,160,0.3);
+      --amber:     #f59e0b;
+      --amber-dim: rgba(245,158,11,0.12);
+      --red:       #e03030;
+      --red-dim:   rgba(224,48,48,0.1);
+      --text:      #e8edf5;
+      --muted:     #6b7a94;
+      --mono:      'DM Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0 0 80px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 48px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+
+    .logo sup {
+      font-size: 0.6em;
+      color: var(--teal);
+      vertical-align: super;
+    }
+
+    .tagline {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 56px 48px 40px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 300;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 10px;
+    }
+
+    .hero h1 strong {
+      font-weight: 700;
+      color: var(--teal);
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 480px;
+      line-height: 1.6;
+    }
+
+    /* ── MAIN LAYOUT ── */
+    .main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 48px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* ── CONTROLS ── */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .control-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .control-card h3 {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* Panel slider */
+    .panel-display {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .panel-display .big-num {
+      font-family: var(--mono);
+      font-size: 3.2rem;
+      font-weight: 500;
+      color: var(--teal);
+      line-height: 1;
+    }
+
+    .panel-display .unit {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 10px var(--teal-glow);
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--teal);
+      border: none;
+      box-shadow: 0 0 10px var(--teal-glow);
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    /* Battery buttons */
+    .battery-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .bat-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+    }
+
+    .bat-btn .bat-kwh {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--text);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .bat-btn:hover {
+      border-color: var(--teal);
+      color: var(--text);
+    }
+
+    .bat-btn.active {
+      background: var(--teal-dim);
+      border-color: var(--teal);
+      color: var(--teal);
+    }
+
+    .bat-btn.active .bat-kwh {
+      color: var(--teal);
+    }
+
+    /* ── VISUALIZATION ── */
+    .viz {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* KWP summary row */
+    .kwp-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .kwp-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .kwp-stat .val {
+      font-family: var(--mono);
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--teal);
+    }
+
+    .kwp-stat .lbl {
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .kwp-divider {
+      width: 1px;
+      height: 40px;
+      background: var(--border);
+    }
+
+    /* Energy flow diagram */
+    .flow-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 28px;
+    }
+
+    .flow-card h3 {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    .flow-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+
+    .flow-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .flow-node .node-box {
+      width: 100%;
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+      border: 1px solid;
+      position: relative;
+    }
+
+    .flow-node .node-icon {
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .flow-node .node-val {
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      font-weight: 500;
+      display: block;
+    }
+
+    .flow-node .node-lbl {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-top: 4px;
+      display: block;
+    }
+
+    .node-solar  { background: var(--teal-dim);  border-color: var(--teal);  }
+    .node-solar .node-val { color: var(--teal); }
+
+    .node-battery { background: var(--amber-dim); border-color: var(--amber); }
+    .node-battery .node-val { color: var(--amber); }
+
+    .node-home   { background: var(--surface2); border-color: var(--border); }
+    .node-home .node-val { color: var(--text); }
+
+    .node-grid-in  { background: var(--red-dim);   border-color: var(--red);   }
+    .node-grid-in .node-val { color: var(--red); }
+
+    .node-feed   { background: var(--teal-dim);  border-color: var(--teal);  }
+    .node-feed .node-val { color: var(--teal); }
+
+    /* Flow arrows */
+    .flow-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+      width: 48px;
+    }
+
+    .arrow-line {
+      width: 100%;
+      height: 2px;
+      position: relative;
+    }
+
+    .arrow-line::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: -4px;
+      border: 5px solid transparent;
+    }
+
+    .arrow-teal  { background: var(--teal); }
+    .arrow-teal::after  { border-left-color: var(--teal); }
+    .arrow-amber { background: var(--amber); }
+    .arrow-amber::after { border-left-color: var(--amber); }
+    .arrow-red   { background: var(--red); }
+    .arrow-red::after   { border-left-color: var(--red); }
+
+    .arrow-kwh {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* Breakdown bars */
+    .breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .bar-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      width: 140px;
+      flex-shrink: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .bar-fill-teal  { background: var(--teal); box-shadow: 0 0 8px var(--teal-glow); }
+    .bar-fill-amber { background: var(--amber); }
+    .bar-fill-red   { background: var(--red); }
+
+    .bar-val {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text);
+      width: 90px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* Battery visual */
+    .battery-visual {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .battery-icon-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .battery-shell {
+      width: 72px;
+      height: 34px;
+      border: 2px solid var(--amber);
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .battery-shell::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 14px;
+      background: var(--amber);
+      border-radius: 0 3px 3px 0;
+    }
+
+    .battery-fill {
+      height: 100%;
+      background: var(--amber);
+      opacity: 0.7;
+      transition: width 0.4s ease;
+      border-radius: 3px 0 0 3px;
+    }
+
+    .battery-pct {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .battery-info {
+      flex: 1;
+    }
+
+    .battery-info .bat-size {
+      font-family: var(--mono);
+      font-size: 1.8rem;
+      font-weight: 500;
+      color: var(--amber);
+      line-height: 1;
+    }
+
+    .battery-info .bat-desc {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    .battery-info .bat-ratio {
+      font-size: 0.7rem;
+      color: var(--teal);
+      margin-top: 6px;
+      font-family: var(--mono);
+    }
+
+    /* ── FADE IN ── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.5s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: none; }
+    }
+
+    .fade-in:nth-child(1) { animation-delay: 0.05s; }
+    .fade-in:nth-child(2) { animation-delay: 0.12s; }
+    .fade-in:nth-child(3) { animation-delay: 0.19s; }
+    .fade-in:nth-child(4) { animation-delay: 0.26s; }
+
+    @media (max-width: 720px) {
+      header { padding: 20px 24px; }
+      .hero, .main { padding-left: 24px; padding-right: 24px; }
+      .main { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Voltara<sup>™</sup></div>
+  <div class="tagline">Solar Eigenverbrauch Rechner</div>
+</header>
+
+<div class="hero">
+  <h1>Deine <strong>Solaranlage.</strong><br>Jedes Panel zählt.</h1>
+  <p>Sieh in Echtzeit, wie jedes zusätzliche Panel deine Energiebilanz verändert — mit Batterie, Einspeisung und echtem Eigenverbrauch.</p>
+</div>
+
+<div class="main">
+
+  <!-- CONTROLS -->
+  <div class="controls">
+
+    <div class="control-card fade-in">
+      <h3>Anzahl Module</h3>
+      <div class="panel-display">
+        <span class="big-num" id="panel-count">10</span>
+        <span class="unit">Module × 450 Wp</span>
+      </div>
+      <input type="range" id="panel-slider" min="1" max="40" value="10" />
+      <div class="slider-labels"><span>1</span><span>20</span><span>40</span></div>
+    </div>
+
+    <div class="control-card fade-in">
+      <h3>Batteriegröße</h3>
+      <div class="battery-options">
+        <button class="bat-btn" data-kwh="0" onclick="setBattery(0)">
+          <span class="bat-kwh">–</span>ohne
+        </button>
+        <button class="bat-btn" data-kwh="5" onclick="setBattery(5)">
+          <span class="bat-kwh">5 kWh</span>klein
+        </button>
+        <button class="bat-btn active" data-kwh="10" onclick="setBattery(10)">
+          <span class="bat-kwh">10 kWh</span>standard
+        </button>
+        <button class="bat-btn" data-kwh="15" onclick="setBattery(15)">
+          <span class="bat-kwh">15 kWh</span>groß
+        </button>
+        <button class="bat-btn" data-kwh="20" onclick="setBattery(20)">
+          <span class="bat-kwh">20 kWh</span>max
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- VISUALIZATION -->
+  <div class="viz">
+
+    <!-- KWP summary -->
+    <div class="kwp-bar fade-in">
+      <div class="kwp-stat">
+        <span class="val" id="stat-kwp">4.50</span>
+        <span class="lbl">kWp installiert</span>
+      </div>
+      <div class="kwp-divider"></div>
+      <div class="kwp-stat">
+        <span class="val" id="stat-production">4.275</span>
+        <span class="lbl">kWh/Jahr Erzeugung</span>
+      </div>
+      <div class="kwp-divider"></div>
+      <div class="kwp-stat" title="Jahresstromverbrauch – mit Mausrad ändern">
+        <input type="number" id="stat-consumption" value="3800" min="500" max="20000" step="50"
+          style="width:80px;background:transparent;border:none;border-bottom:1.5px dashed var(--teal);
+          color:var(--teal);font-family:var(--mono);font-size:1.5rem;font-weight:500;
+          outline:none;text-align:left;-moz-appearance:textfield;" />
+        <span class="lbl">kWh/Jahr Verbrauch ↕</span>
+      </div>
+      <div class="kwp-divider"></div>
+      <div class="kwp-stat">
+        <span class="val" id="stat-eigenverbrauch">–</span>
+        <span class="lbl">kWh Eigenverbrauch</span>
+      </div>
+      <div class="kwp-divider"></div>
+      <div class="kwp-stat">
+        <span class="val" id="stat-ratio">–</span>
+        <span class="lbl">Autarkie</span>
+      </div>
+    </div>
+
+    <!-- Energy flow -->
+    <div class="flow-card fade-in">
+      <h3>Energiefluss / Jahr</h3>
+
+      <div class="flow-diagram">
+        <div class="flow-node">
+          <div class="node-box node-solar">
+            <span class="node-icon">☀️</span>
+            <span class="node-val" id="flow-production">–</span>
+            <span class="node-lbl">Erzeugung</span>
+          </div>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line arrow-teal"></div>
+          <span class="arrow-kwh" id="arrow-eigen">–</span>
+        </div>
+
+        <div class="flow-node">
+          <div class="node-box node-battery">
+            <span class="node-icon">🔋</span>
+            <span class="node-val" id="flow-battery">–</span>
+            <span class="node-lbl">Batterie</span>
+          </div>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line arrow-amber"></div>
+          <span class="arrow-kwh" id="arrow-home">–</span>
+        </div>
+
+        <div class="flow-node">
+          <div class="node-box node-home">
+            <span class="node-icon">🏠</span>
+            <span class="node-val" id="flow-consumption">–</span>
+            <span class="node-lbl">Jahresverbrauch</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Breakdown bars -->
+      <div class="breakdown">
+        <div class="bar-row">
+          <span class="bar-label">Eigenverbrauch</span>
+          <div class="bar-track"><div class="bar-fill bar-fill-teal" id="bar-eigen" style="width:0%"></div></div>
+          <span class="bar-val" id="val-eigen">–</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Einspeisung</span>
+          <div class="bar-track"><div class="bar-fill bar-fill-amber" id="bar-feed" style="width:0%"></div></div>
+          <span class="bar-val" id="val-feed">–</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Netzbezug</span>
+          <div class="bar-track"><div class="bar-fill bar-fill-red" id="bar-grid" style="width:0%"></div></div>
+          <span class="bar-val" id="val-grid">–</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Battery visual -->
+    <div class="battery-visual fade-in" id="battery-section">
+      <div class="battery-icon-wrap">
+        <div class="battery-shell">
+          <div class="battery-fill" id="bat-fill" style="width:70%"></div>
+          <div class="battery-pct" id="bat-pct">70%</div>
+        </div>
+      </div>
+      <div class="battery-info">
+        <div class="bat-size" id="bat-size-display">10 kWh</div>
+        <div class="bat-desc" id="bat-desc">Standard-Hausbatterie · täglicher Puffer</div>
+        <div class="bat-ratio" id="bat-ratio-display">Eigenverbrauchsquote +22 % vs. ohne Batterie</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── CONSTANTS ──
+  const PANEL_WP      = 0.45;  // kWp per panel
+  const YIELD_PER_KWP = 950;   // kWh/year per kWp (German average, H0 south-facing 35°)
+
+  const BATTERY_DESC = {
+    0:  'Kein Speicher · direkter Eigenverbrauch',
+    5:  'Kleine Hausbatterie · Abend-Puffer',
+    10: 'Standard-Hausbatterie · täglicher Puffer',
+    15: 'Großer Speicher · 1–2 Tage Autarkie',
+    20: 'Premium-Speicher · maximale Unabhängigkeit'
+  };
+
+  let currentBattery = 10;
+
+  // ── HTW BERLIN / WENIGER ET AL. FORMULA ──
+  //
+  // We work with AUTARKIE (Deckungsgrad) directly — share of demand covered by solar.
+  // This is the more natural quantity and enforces both physical constraints:
+  //   1. Eigenverbrauch ≤ demand  (can't self-consume more than you need)
+  //   2. Autarkie ≤ realistic max (~82% for H0 Germany, even with large battery+system)
+  //
+  // Fit to HTW Berlin independence calculator curves (Weniger, Tjaden, Quaschning):
+  //   autarkie = A_max × (1 - exp(-k × pvRatio))
+  // where:
+  //   pvRatio  = production / demand  (how oversized is the system vs consumption)
+  //   A_max    = maximum reachable autarkie given battery size (asymptote)
+  //   k        = saturation speed (how fast you approach A_max as you add panels)
+  //
+  // A_max and k are calibrated per battery size to match HTW published curves:
+  const BATTERY_PARAMS = {
+  //  kWh : { A_max, k }
+     0:  { A_max: 0.50, k: 1.00 },  // no battery: ~50% max autarkie
+     5:  { A_max: 0.65, k: 1.10 },
+    10:  { A_max: 0.74, k: 1.15 },
+    15:  { A_max: 0.79, k: 1.18 },
+    20:  { A_max: 0.82, k: 1.20 },  // large battery: ~82% realistic max
+  };
+
+  function calcEnergy(production, demand, batteryKwh) {
+    if (production <= 0) return { eigenverbrauch: 0, feedIn: 0, gridPurchase: demand, autarkie: 0 };
+
+    const { A_max, k } = BATTERY_PARAMS[batteryKwh];
+    const pvRatio = production / demand;
+
+    // Autarkie: share of demand covered
+    const autarkieRate = A_max * (1 - Math.exp(-k * pvRatio));
+
+    // Eigenverbrauch: always ≤ demand AND ≤ production
+    const eigenverbrauch = Math.min(autarkieRate * demand, production, demand);
+
+    // Self-consumption rate (Eigenverbrauchsanteil): share of production used on-site
+    const scRate = eigenverbrauch / production;
+
+    const feedIn       = production - eigenverbrauch;   // surplus to grid
+    const gridPurchase = demand - eigenverbrauch;        // still needed from grid
+
+    return { eigenverbrauch, feedIn, gridPurchase, autarkieRate, scRate };
+  }
+
+  function fmt(n) {
+    return Math.round(n).toLocaleString('de-DE');
+  }
+
+  function fmtKwh(n) {
+    return fmt(n) + ' kWh';
+  }
+
+  function getConsumption() {
+    return Math.max(500, parseFloat(document.getElementById('stat-consumption').value) || 3800);
+  }
+
+  function setBattery(kwh) {
+    currentBattery = kwh;
+    document.querySelectorAll('.bat-btn').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.kwh) === kwh);
+    });
+    update();
+  }
+
+  function update() {
+    const panels      = parseInt(document.getElementById('panel-slider').value);
+    const demand      = getConsumption();
+    const kwp         = panels * PANEL_WP;
+    const production  = kwp * YIELD_PER_KWP;
+
+    const { eigenverbrauch, feedIn, gridPurchase, autarkieRate, scRate } =
+      calcEnergy(production, demand, currentBattery);
+    const { scRate: sc0Rate } = calcEnergy(production, demand, 0);
+
+    const autarkiePct = autarkieRate * 100;
+    const maxVal = Math.max(production, demand);
+
+    // Controls
+    document.getElementById('panel-count').textContent = panels;
+
+    // KWP bar
+    document.getElementById('stat-kwp').textContent            = kwp.toFixed(2);
+    document.getElementById('stat-production').textContent     = fmt(production);
+    document.getElementById('stat-eigenverbrauch').textContent = fmt(eigenverbrauch);
+    document.getElementById('stat-ratio').textContent          = autarkiePct.toFixed(0) + ' %';
+
+    // Flow diagram
+    document.getElementById('flow-production').textContent  = fmtKwh(production);
+    document.getElementById('flow-consumption').textContent = fmtKwh(demand);
+    document.getElementById('flow-battery').textContent     = currentBattery > 0 ? currentBattery + ' kWh' : '–';
+    document.getElementById('arrow-eigen').textContent      = fmtKwh(eigenverbrauch);
+    document.getElementById('arrow-home').textContent       = fmtKwh(eigenverbrauch);
+
+    // Bars
+    document.getElementById('bar-eigen').style.width = (eigenverbrauch / maxVal * 100) + '%';
+    document.getElementById('bar-feed').style.width  = (feedIn         / maxVal * 100) + '%';
+    document.getElementById('bar-grid').style.width  = (gridPurchase   / maxVal * 100) + '%';
+
+    document.getElementById('val-eigen').textContent = fmtKwh(eigenverbrauch);
+    document.getElementById('val-feed').textContent  = fmtKwh(feedIn);
+    document.getElementById('val-grid').textContent  = fmtKwh(gridPurchase);
+
+    // Battery visual
+    const batSection = document.getElementById('battery-section');
+    if (currentBattery === 0) {
+      batSection.style.opacity = '0.35';
+    } else {
+      batSection.style.opacity = '1';
+      document.getElementById('bat-fill').style.width         = Math.min(100, autarkiePct) + '%';
+      document.getElementById('bat-pct').textContent          = autarkiePct.toFixed(0) + '%';
+      document.getElementById('bat-size-display').textContent = currentBattery + ' kWh';
+      document.getElementById('bat-desc').textContent         = BATTERY_DESC[currentBattery];
+      const boost = Math.round((scRate - sc0Rate) * 100);
+      document.getElementById('bat-ratio-display').textContent =
+        `Batterie-Boost: +${boost} % Eigenverbrauchsanteil vs. ohne Speicher`;
+    }
+  }
+
+  // Panel slider
+  document.getElementById('panel-slider').addEventListener('input', update);
+
+  // Consumption input: typing + mousewheel
+  const consumptionInput = document.getElementById('stat-consumption');
+  consumptionInput.addEventListener('input', update);
+  consumptionInput.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    const dir = e.deltaY < 0 ? 1 : -1;
+    this.value = Math.max(500, (parseFloat(this.value) || 3800) + dir * 50);
+    update();
+  }, { passive: false });
+
+  // Remove spin buttons
+  consumptionInput.style.cssText += ';-webkit-appearance:none;';
+
+  update();
+</script>
+</body>
+</html>
