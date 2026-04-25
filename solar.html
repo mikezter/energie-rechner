@@ -901,11 +901,14 @@
     const kwp         = panels * PANEL_WP;
     const production  = kwp * YIELD_PER_KWP;
 
-    const { eigenverbrauch, feedIn, gridPurchase, autarkieRate, scRate } =
+    const { eigenverbrauch, feedIn, gridPurchase, autarkieRate } =
       calcEnergy(production, demand, currentBattery);
-    const { scRate: sc0Rate } = calcEnergy(production, demand, 0);
+    const { eigenverbrauch: eigenverbrauchDirect, autarkieRate: autarkieRate0 } =
+      calcEnergy(production, demand, 0);
 
     const autarkiePct = autarkieRate * 100;
+    const batteryThroughput = Math.max(0, eigenverbrauch - eigenverbrauchDirect);
+    const autarkieGainPP = Math.round((autarkieRate - autarkieRate0) * 100);
     const maxVal = Math.max(production, demand);
 
     // Controls
@@ -920,8 +923,8 @@
     // Flow diagram
     document.getElementById('flow-production').textContent  = fmtKwh(production);
     document.getElementById('flow-consumption').textContent = fmtKwh(demand);
-    document.getElementById('flow-battery').textContent     = currentBattery > 0 ? currentBattery + ' kWh' : '–';
-    document.getElementById('arrow-eigen').textContent      = fmtKwh(eigenverbrauch);
+    document.getElementById('flow-battery').textContent     = currentBattery > 0 ? fmtKwh(batteryThroughput) : '–';
+    document.getElementById('arrow-eigen').textContent      = fmtKwh(batteryThroughput);
     document.getElementById('arrow-home').textContent       = fmtKwh(eigenverbrauch);
 
     // Bars
@@ -939,13 +942,13 @@
       batSection.style.opacity = '0.35';
     } else {
       batSection.style.opacity = '1';
-      document.getElementById('bat-fill').style.width         = Math.min(100, autarkiePct) + '%';
-      document.getElementById('bat-pct').textContent          = autarkiePct.toFixed(0) + '%';
+      const dailyUtil = Math.min(100, (batteryThroughput / (currentBattery * 365)) * 100);
+      document.getElementById('bat-fill').style.width         = dailyUtil.toFixed(0) + '%';
+      document.getElementById('bat-pct').textContent          = dailyUtil.toFixed(0) + '%';
       document.getElementById('bat-size-display').textContent = currentBattery + ' kWh';
       document.getElementById('bat-desc').textContent         = BATTERY_DESC[currentBattery];
-      const boost = Math.round((scRate - sc0Rate) * 100);
       document.getElementById('bat-ratio-display').textContent =
-        `Batterie-Boost: +${boost} % Eigenverbrauchsanteil vs. ohne Speicher`;
+        `Autarkie-Gewinn durch Batterie: +${autarkieGainPP} Prozentpunkte`;
     }
   }
 
